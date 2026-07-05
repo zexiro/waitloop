@@ -21,7 +21,7 @@ ${docs
 
 ## Key facts
 
-- Create a waitlist: MCP tool create_waitlist, CLI \`npx waitloop waitlists:create --name "..."\`, or POST ${base}/api/v1/waitlists
+- Create a waitlist: MCP tool create_waitlist, CLI \`npx waitloop-cli waitlists:create --name "..."\`, or POST ${base}/api/v1/waitlists
 - Waitlists are referenced by UUID or slug everywhere
 - Public signup endpoint (no auth, CORS-open): POST ${base}/api/public/w/<slug>/signups with {"email": "..."}
 - Hosted pages live at ${base}/w/<slug>; referral links append ?ref=<code>

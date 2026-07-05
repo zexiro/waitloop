@@ -29,7 +29,7 @@ The `create_waitlist` tool call returns a live page URL. Share it — the line i
 
 ```bash
 # CLI — every command prints JSON
-WAITLOOP_API_KEY=wl_YOUR_KEY npx waitloop waitlists:create --name "Acme Robots"
+WAITLOOP_API_KEY=wl_YOUR_KEY npx waitloop-cli waitlists:create --name "Acme Robots"
 
 # REST
 curl -X POST https://waitloop.dev/api/v1/waitlists \

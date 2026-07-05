@@ -18,16 +18,16 @@ If the key is missing, ask the user to create one — do not guess.
 
 ```bash
 # 1. Create a waitlist (returns the live page URL — share it immediately)
-npx waitloop waitlists:create --name "Product Name" \
+npx waitloop-cli waitlists:create --name "Product Name" \
   --headline "One-line pitch" --description "Why join" \
   --accent "#ff6b3d" --background dark
 
 # 2. Monitor
-npx waitloop stats <slug>
-npx waitloop signups:list <slug> --limit 50
+npx waitloop-cli stats <slug>
+npx waitloop-cli signups:list <slug> --limit 50
 
 # 3. Launch day
-npx waitloop export <slug> --format csv > signups.csv
+npx waitloop-cli export <slug> --format csv > signups.csv
 ```
 
 ## Notes
@@ -35,6 +35,6 @@ npx waitloop export <slug> --format csv > signups.csv
 - Waitlists are referenced by slug or UUID interchangeably.
 - Referral ranking is on by default: each signup gets a `?ref=` link that moves them up when others join through it. Disable with `--no-referrals`.
 - `--webhook <url>` gets a POST on every signup (`signup.created`).
-- Theme updates merge: `npx waitloop waitlists:update <slug> --success "See you soon."`
+- Theme updates merge: `npx waitloop-cli waitlists:update <slug> --success "See you soon."`
 - Embed the form in an existing site: `<div data-waitloop="<slug>"></div><script src="https://waitloop.dev/embed.js" async></script>`
 - Full docs, machine-readable: https://waitloop.dev/llms.txt

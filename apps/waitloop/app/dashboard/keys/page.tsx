@@ -35,7 +35,7 @@ export default async function KeysPage({
           <code className="font-mono text-xs break-all select-all">{newKey}</code>
           <div className="mt-4 grid gap-1 font-mono text-[11px] opacity-70">
             <div>MCP: claude mcp add --transport http waitloop {appUrl()}/api/mcp --header &quot;Authorization: Bearer {newKey.slice(0, 11)}…&quot;</div>
-            <div>CLI: WAITLOOP_API_KEY={newKey.slice(0, 11)}… npx waitloop waitlists:list</div>
+            <div>CLI: WAITLOOP_API_KEY={newKey.slice(0, 11)}… npx waitloop-cli waitlists:list</div>
           </div>
         </div>
       ) : null}

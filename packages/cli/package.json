@@ -1,5 +1,5 @@
 {
-  "name": "waitloop",
+  "name": "waitloop-cli",
   "version": "0.1.0",
   "description": "Waitloop CLI — agent-first waitlists. Every command outputs structured JSON.",
   "license": "AGPL-3.0",

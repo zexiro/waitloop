@@ -38,9 +38,9 @@ claude mcp add --transport http waitloop https://waitloop.dev/api/mcp \
 **CLI** — every command outputs structured JSON, designed for LLMs and pipelines:
 
 ```bash
-WAITLOOP_API_KEY=wl_YOUR_KEY npx waitloop waitlists:create --name "Acme Robots"
-npx waitloop stats acme-robots
-npx waitloop export acme-robots --format csv
+WAITLOOP_API_KEY=wl_YOUR_KEY npx waitloop-cli waitlists:create --name "Acme Robots"
+npx waitloop-cli stats acme-robots
+npx waitloop-cli export acme-robots --format csv
 ```
 
 **REST**:
@@ -75,7 +75,7 @@ No database needed for local dev — it falls back to embedded Postgres (PGlite)
 ## Repo layout
 
 - `apps/waitloop` — Next.js app: hosted pages, dashboard, REST API, MCP server, docs
-- `packages/cli` — the `waitloop` npm package (`npx waitloop`)
+- `packages/cli` — the `waitloop-cli` npm package (`npx waitloop-cli`)
 - `skills/waitloop` — agent skill (SKILL.md) for coding agents
 
 ## License
