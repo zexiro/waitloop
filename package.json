@@ -1,0 +1,10 @@
+{
+  "name": "agentfirst",
+  "private": true,
+  "packageManager": "pnpm@11.0.8",
+  "scripts": {
+    "dev": "pnpm --dir apps/waitloop dev",
+    "build": "pnpm --dir apps/waitloop build",
+    "start": "pnpm --dir apps/waitloop start"
+  }
+}

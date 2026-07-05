@@ -1,0 +1,29 @@
+{
+  "name": "waitloop",
+  "version": "0.1.0",
+  "description": "Waitloop CLI — agent-first waitlists. Every command outputs structured JSON.",
+  "license": "AGPL-3.0",
+  "type": "module",
+  "bin": {
+    "waitloop": "bin/waitloop.js"
+  },
+  "files": [
+    "bin"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "waitlist",
+    "mcp",
+    "agent",
+    "cli",
+    "referral"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zexiro/waitloop.git",
+    "directory": "packages/cli"
+  },
+  "homepage": "https://github.com/zexiro/waitloop"
+}
