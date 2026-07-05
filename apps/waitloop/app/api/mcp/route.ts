@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getApiKeyUser } from "@/lib/auth";
+import { checkAccess } from "@/lib/entitlements";
 import { ApiError } from "@/lib/waitlists";
 import { MCP_TOOLS } from "@/lib/mcp-tools";
 import type { User } from "@/lib/db";
@@ -57,6 +58,7 @@ async function handleMessage(msg: JsonRpcRequest, user: User) {
       const tool = MCP_TOOLS.find((t) => t.name === name);
       if (!tool) return rpcError(msg.id, -32602, `unknown tool: ${name}`);
       try {
+        await checkAccess(user);
         const result = await tool.handler(user, args);
         return rpcResult(msg.id, {
           content: [{ type: "text", text: JSON.stringify(result, null, 2) }],

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getApiKeyUser } from "./auth";
+import { checkAccess } from "./entitlements";
 import { ApiError } from "./waitlists";
 import type { User } from "./db";
 
@@ -17,6 +18,7 @@ export function withApiAuth<Ctx = unknown>(handler: Handler<Ctx>) {
           { status: 401 },
         );
       }
+      await checkAccess(user);
       return await handler(req, user, ctx);
     } catch (err) {
       return errorResponse(err);

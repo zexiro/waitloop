@@ -3,7 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getSessionUser, createApiKey, revokeApiKey } from "@/lib/auth";
-import { createWaitlist, deleteWaitlist } from "@/lib/waitlists";
+import { checkAccess } from "@/lib/entitlements";
+import { ApiError, createWaitlist, deleteWaitlist } from "@/lib/waitlists";
 
 async function requireUser() {
   const user = await getSessionUser();
@@ -11,8 +12,19 @@ async function requireUser() {
   return user;
 }
 
-export async function createWaitlistAction(formData: FormData) {
+async function requireActiveUser() {
   const user = await requireUser();
+  try {
+    await checkAccess(user);
+  } catch (err) {
+    if (err instanceof ApiError && err.status === 402) redirect("/billing");
+    throw err;
+  }
+  return user;
+}
+
+export async function createWaitlistAction(formData: FormData) {
+  const user = await requireActiveUser();
   const name = String(formData.get("name") ?? "").trim();
   if (!name) return;
   const w = await createWaitlist(user.id, { name });
