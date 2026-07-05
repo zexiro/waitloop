@@ -10,6 +10,7 @@ import {
   updateWaitlist,
 } from "./waitlists";
 import type { User } from "./db";
+import { normalizeAvatarPatch } from "./avatars";
 
 type JsonSchema = Record<string, unknown>;
 
@@ -30,7 +31,7 @@ const themeProps: JsonSchema = {
     successMessage: { type: "string", description: "Message shown after signing up" },
     logoUrl: { type: "string", description: "URL of a logo image to show above the headline" },
     accentColor: { type: "string", description: "Hex accent color, e.g. #6c5ce7" },
-    background: { type: "string", enum: ["dark", "light"], description: "Page color scheme (default dark)" },
+    background: { type: "string", enum: ["dark", "light"], description: "Page color scheme (default light)" },
   },
   additionalProperties: false,
 };
@@ -40,11 +41,24 @@ const idParam: JsonSchema = {
   description: "Waitlist id (UUID) or slug",
 };
 
+const avatarProps: JsonSchema = {
+  type: "object",
+  description:
+    "Queue avatar for this signup (shown at their position in the public queue). Omitted fields are dealt automatically.",
+  properties: {
+    expression: { type: "string", enum: ["smile", "grin", "wink", "joy", "starry"] },
+    accessory: { type: "string", enum: ["none", "party", "cap", "bow", "glasses"] },
+    color: { type: "string", description: "Hex color, e.g. #ffa1c3" },
+  },
+  additionalProperties: false,
+};
+
 function summarize(w: {
   id: string;
   slug: string;
   name: string;
   referralsEnabled: boolean;
+  avatarsEnabled: boolean;
   webhookUrl: string | null;
 }) {
   return {
@@ -53,6 +67,7 @@ function summarize(w: {
     name: w.name,
     pageUrl: `${appUrl()}/w/${w.slug}`,
     referralsEnabled: w.referralsEnabled,
+    avatarsEnabled: w.avatarsEnabled,
     webhookUrl: w.webhookUrl,
   };
 }
@@ -72,7 +87,7 @@ export const MCP_TOOLS: McpTool[] = [
   {
     name: "create_waitlist",
     description:
-      "Create a waitlist with a hosted signup page. Returns the public page URL immediately — the page is live as soon as this call returns. Referral links are enabled by default: every signup gets a unique link that moves them up the list when others join through it.",
+      "Create a waitlist with a hosted signup page. Returns the public page URL immediately — the page is live as soon as this call returns. Referral links are enabled by default: every signup gets a unique link that moves them up the list when others join through it. The page shows the front of the line as queue avatars; signups can customize theirs, and top referrers earn visible items (crown at #1, balloon/pennant/golden glow at 1/5/10 referrals).",
     inputSchema: {
       type: "object",
       properties: {
@@ -80,7 +95,14 @@ export const MCP_TOOLS: McpTool[] = [
         slug: { type: "string", description: "Optional custom URL slug (lowercase, hyphens)" },
         theme: themeProps,
         referralsEnabled: { type: "boolean", description: "Enable referral ranking (default true)" },
-        webhookUrl: { type: "string", description: "URL to POST signup.created events to" },
+        avatarsEnabled: {
+          type: "boolean",
+          description: "Show the avatar queue and let signups customize their avatar (default true)",
+        },
+        webhookUrl: {
+          type: "string",
+          description: "URL to POST signup.created and referral.milestone events to",
+        },
       },
       required: ["name"],
       additionalProperties: false,
@@ -100,6 +122,7 @@ export const MCP_TOOLS: McpTool[] = [
         slug: { type: "string" },
         theme: themeProps,
         referralsEnabled: { type: "boolean" },
+        avatarsEnabled: { type: "boolean" },
         webhookUrl: { type: ["string", "null"], description: "Set null to remove" },
       },
       required: ["id"],
@@ -193,15 +216,17 @@ export const MCP_TOOLS: McpTool[] = [
         id: idParam,
         email: { type: "string" },
         referredByCode: { type: "string", description: "Referral code of the signup who referred them" },
+        avatar: avatarProps,
         metadata: { type: "object", description: "Arbitrary JSON stored with the signup" },
       },
       required: ["id", "email"],
       additionalProperties: false,
     },
-    handler: async (user, { id, email, referredByCode, metadata }) => {
+    handler: async (user, { id, email, referredByCode, avatar, metadata }) => {
       const w = await getWaitlist(user.id, id as string);
       return await addSignup(w, email as string, {
         referredByCode: referredByCode as string | undefined,
+        avatar: avatar ? normalizeAvatarPatch(avatar) : undefined,
         metadata: metadata as Record<string, unknown> | undefined,
       });
     },

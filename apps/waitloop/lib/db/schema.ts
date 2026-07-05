@@ -71,6 +71,7 @@ export const waitlists = pgTable(
     name: text("name").notNull(),
     theme: jsonb("theme").$type<WaitlistTheme>().notNull().default({}),
     referralsEnabled: boolean("referrals_enabled").notNull().default(true),
+    avatarsEnabled: boolean("avatars_enabled").notNull().default(true),
     webhookUrl: text("webhook_url"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
@@ -89,6 +90,8 @@ export const signups = pgTable(
     referralCode: text("referral_code").notNull().unique(),
     referredBy: uuid("referred_by"),
     referralCount: integer("referral_count").notNull().default(0),
+    // Customized queue avatar; null means "wear the face dealt from the referral code".
+    avatar: jsonb("avatar").$type<Partial<import("../avatars").Avatar>>(),
     metadata: jsonb("metadata").$type<Record<string, unknown>>().notNull().default({}),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },

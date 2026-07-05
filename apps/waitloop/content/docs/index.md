@@ -6,7 +6,9 @@ Every waitlist gets:
 
 - A live hosted page at `/w/<slug>` with email capture
 - Referral links — each signup gets a unique URL; when someone joins through it, the referrer moves up the list
-- Stats (total, 24h, 7d, top referrers), CSV export, and a `signup.created` webhook
+- Queue avatars — the front of the line is shown as a row of faces; signups pick their expression, accessory, and color (or get dealt a random face)
+- Earned items the queue hands out itself: the crown for holding #1, a balloon/pennant/golden glow at 1/5/10 referrals
+- Stats (total, 24h, 7d, top referrers), CSV export, and `signup.created` / `referral.milestone` webhooks
 
 ## Quickstart (60 seconds)
 
@@ -21,7 +23,7 @@ claude mcp add --transport http waitloop https://waitloop.dev/api/mcp \
 
 3. **Ask for a waitlist**:
 
-> create a waitlist called "Acme Robots", dark page, accent #ff6b3d
+> create a waitlist called "Acme Robots", accent #ff7bac
 
 The `create_waitlist` tool call returns a live page URL. Share it — the line is open.
 
@@ -42,7 +44,7 @@ curl -X POST https://waitloop.dev/api/v1/waitlists \
 - [MCP server](/docs/mcp) — endpoint, auth, all 8 tools
 - [CLI](/docs/cli) — commands and flags
 - [REST API](/docs/api) — endpoints with curl examples
-- [Webhooks](/docs/webhooks) — signup.created payload
+- [Webhooks](/docs/webhooks) — signup.created and referral.milestone payloads
 - [Embed widget](/docs/embed) — drop the form into any site
 - [Self-hosting](/docs/self-hosting) — docker compose up
 

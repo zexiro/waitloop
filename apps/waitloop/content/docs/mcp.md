@@ -20,14 +20,14 @@ Any MCP client that speaks streamable HTTP works the same way.
 
 | Tool | What it does |
 | --- | --- |
-| `create_waitlist` | Create a waitlist + live hosted page. Args: `name` (required), `slug`, `theme` (headline, description, buttonText, successMessage, logoUrl, accentColor, background), `referralsEnabled`, `webhookUrl`. Returns the public `pageUrl`. |
+| `create_waitlist` | Create a waitlist + live hosted page. Args: `name` (required), `slug`, `theme` (headline, description, buttonText, successMessage, logoUrl, accentColor, background), `referralsEnabled`, `avatarsEnabled`, `webhookUrl`. Returns the public `pageUrl`. |
 | `list_waitlists` | All waitlists with signup counts and page URLs. |
-| `update_waitlist` | Patch name/slug/theme/referrals/webhook. Theme fields merge, not replace. |
+| `update_waitlist` | Patch name/slug/theme/referrals/avatars/webhook. Theme fields merge, not replace. |
 | `delete_waitlist` | Permanently delete a waitlist and its signups. |
 | `get_stats` | Total signups, last 24h, last 7d, referred count, top referrers. |
 | `list_signups` | Signups ordered by position. `limit` (≤1000), `offset`. |
 | `export_signups` | Full CSV export (email, position, referral code, referral count, created_at). |
-| `add_signup` | Add a signup directly (imports, manual adds). Dedupes by email. |
+| `add_signup` | Add a signup directly (imports, manual adds). Dedupes by email. Optional `avatar` (expression/accessory/color) sets their queue face. |
 
 Waitlists can be referenced by UUID **or slug** in every tool that takes an `id`.
 

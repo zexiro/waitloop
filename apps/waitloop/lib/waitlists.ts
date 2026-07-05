@@ -9,6 +9,12 @@ import {
   type WaitlistTheme,
 } from "./db";
 import { appUrl } from "./auth";
+import {
+  earnedItems,
+  milestoneItem,
+  resolveAvatar,
+  type Avatar,
+} from "./avatars";
 
 export class ApiError extends Error {
   constructor(
@@ -42,6 +48,7 @@ export type WaitlistInput = {
   slug?: string;
   theme?: WaitlistTheme;
   referralsEnabled?: boolean;
+  avatarsEnabled?: boolean;
   webhookUrl?: string | null;
 };
 
@@ -61,6 +68,7 @@ export async function createWaitlist(userId: string, input: WaitlistInput): Prom
       slug,
       theme: input.theme ?? {},
       referralsEnabled: input.referralsEnabled ?? true,
+      avatarsEnabled: input.avatarsEnabled ?? true,
       webhookUrl: input.webhookUrl ?? null,
     })
     .returning();
@@ -116,6 +124,7 @@ export async function updateWaitlist(
       ...(patch.slug !== undefined && { slug: slugify(patch.slug) }),
       ...(patch.theme !== undefined && { theme: { ...existing.theme, ...patch.theme } }),
       ...(patch.referralsEnabled !== undefined && { referralsEnabled: patch.referralsEnabled }),
+      ...(patch.avatarsEnabled !== undefined && { avatarsEnabled: patch.avatarsEnabled }),
       ...(patch.webhookUrl !== undefined && { webhookUrl: patch.webhookUrl }),
       updatedAt: new Date(),
     })
@@ -157,6 +166,8 @@ export function publicSignupView(w: Waitlist, s: Signup, position: number) {
     referralCode: s.referralCode,
     referralCount: s.referralCount,
     referralUrl: `${appUrl()}/w/${w.slug}?ref=${s.referralCode}`,
+    avatar: resolveAvatar(s.avatar, s.referralCode),
+    earned: earnedItems(position, s.referralCount),
     createdAt: s.createdAt,
   };
 }
@@ -164,7 +175,11 @@ export function publicSignupView(w: Waitlist, s: Signup, position: number) {
 export async function addSignup(
   w: Waitlist,
   email: string,
-  opts: { referredByCode?: string; metadata?: Record<string, unknown> } = {},
+  opts: {
+    referredByCode?: string;
+    metadata?: Record<string, unknown>;
+    avatar?: Partial<Avatar>;
+  } = {},
 ) {
   const db = await getDb();
   const normalized = email.trim().toLowerCase();
@@ -194,32 +209,74 @@ export async function addSignup(
       email: normalized,
       referralCode: shortCode(),
       referredBy,
+      avatar: opts.avatar && Object.keys(opts.avatar).length > 0 ? opts.avatar : null,
       metadata: opts.metadata ?? {},
     })
     .returning();
 
   if (referredBy) {
-    await db
+    const [referrer] = await db
       .update(signups)
       .set({ referralCount: sql`${signups.referralCount} + 1` })
-      .where(eq(signups.id, referredBy));
+      .where(eq(signups.id, referredBy))
+      .returning();
+    const item = referrer ? milestoneItem(referrer.referralCount) : null;
+    if (referrer && item) {
+      fireWebhook(w, {
+        event: "referral.milestone",
+        waitlist: { id: w.id, slug: w.slug, name: w.name },
+        signup: {
+          id: referrer.id,
+          email: referrer.email,
+          referralCode: referrer.referralCode,
+          referralCount: referrer.referralCount,
+        },
+        milestone: { referrals: referrer.referralCount, item },
+      }).catch((err) => console.error("webhook failed:", err.message));
+    }
   }
 
-  fireWebhook(w, row).catch((err) => console.error("webhook failed:", err.message));
+  fireWebhook(w, {
+    event: "signup.created",
+    waitlist: { id: w.id, slug: w.slug, name: w.name },
+    signup: {
+      id: row.id,
+      email: row.email,
+      referralCode: row.referralCode,
+      createdAt: row.createdAt,
+    },
+  }).catch((err) => console.error("webhook failed:", err.message));
 
   return { signup: publicSignupView(w, row, await positionOf(w, row)), created: true };
 }
 
-async function fireWebhook(w: Waitlist, s: Signup) {
+/** Update a signup's queue avatar, authenticated by their referral code. */
+export async function updateSignupAvatar(
+  w: Waitlist,
+  referralCode: string,
+  patch: Partial<Avatar>,
+) {
+  const db = await getDb();
+  const [existing] = await db
+    .select()
+    .from(signups)
+    .where(and(eq(signups.waitlistId, w.id), eq(signups.referralCode, referralCode)));
+  if (!existing) throw new ApiError(404, "signup not found");
+  const merged = { ...existing.avatar, ...patch };
+  const [row] = await db
+    .update(signups)
+    .set({ avatar: merged })
+    .where(eq(signups.id, existing.id))
+    .returning();
+  return publicSignupView(w, row, await positionOf(w, row));
+}
+
+async function fireWebhook(w: Waitlist, payload: Record<string, unknown>) {
   if (!w.webhookUrl) return;
   await fetch(w.webhookUrl, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      event: "signup.created",
-      waitlist: { id: w.id, slug: w.slug, name: w.name },
-      signup: { id: s.id, email: s.email, referralCode: s.referralCode, createdAt: s.createdAt },
-    }),
+    body: JSON.stringify(payload),
     signal: AbortSignal.timeout(5000),
   });
 }
@@ -243,9 +300,37 @@ export async function listSignups(
     referralCode: s.referralCode,
     referralCount: s.referralCount,
     referredBy: s.referredBy,
+    avatar: resolveAvatar(s.avatar, s.referralCode),
+    earned: earnedItems(offset + i + 1, s.referralCount),
     metadata: s.metadata,
     createdAt: s.createdAt,
   }));
+}
+
+/**
+ * The front of the line, for rendering the public queue: avatars + earned
+ * items only — no emails leave the server.
+ */
+export async function getQueueFront(w: Waitlist, limit = 10) {
+  const db = await getDb();
+  const rows = await db
+    .select()
+    .from(signups)
+    .where(eq(signups.waitlistId, w.id))
+    .orderBy(desc(signups.referralCount), signups.createdAt)
+    .limit(limit);
+  const [totals] = await db
+    .select({ total: count() })
+    .from(signups)
+    .where(eq(signups.waitlistId, w.id));
+  return {
+    total: Number(totals.total),
+    front: rows.map((s, i) => ({
+      position: i + 1,
+      avatar: resolveAvatar(s.avatar, s.referralCode),
+      earned: earnedItems(i + 1, s.referralCount),
+    })),
+  };
 }
 
 export async function getStats(w: Waitlist) {
