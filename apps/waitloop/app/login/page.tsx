@@ -23,46 +23,44 @@ function LoginInner() {
   }
 
   return (
-    <div className="wl-page" data-scheme="dark">
-      <main className="wl-main">
-        <div className="wl-eyebrow">
-          <span className="wl-dot" aria-hidden />
-          <span>waitloop</span>
-        </div>
-        <h1 className="wl-headline">Log in</h1>
+    <div className="q-scope q-page">
+      <main className="q-page-main">
+        <span className="q-kicker">
+          <span className="q-live-dot" aria-hidden />
+          waitloop
+        </span>
+        <h1 className="q-display q-headline">Log in</h1>
         {sent ? (
-          <p className="wl-description">
+          <p className="q-desc">
             Magic link sent to <strong>{email}</strong>. Check your inbox — or the server logs if
             you&apos;re running without an email provider.
           </p>
         ) : (
           <>
-            <p className="wl-description">
+            <p className="q-desc">
               Enter your email and we&apos;ll send you a login link. No password, no account setup.
             </p>
             {linkError ? (
-              <p className="wl-error">That login link is invalid or expired. Request a new one.</p>
+              <p className="q-error">That login link is invalid or expired. Request a new one.</p>
             ) : null}
-            <form onSubmit={submit} style={{ width: "100%" }}>
-              <div className="wl-form">
-                <input
-                  className="wl-input"
-                  type="email"
-                  required
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  aria-label="Email address"
-                />
-                <button className="wl-button" type="submit" disabled={busy}>
-                  {busy ? "Sending…" : "Send login link"}
-                </button>
-              </div>
+            <form onSubmit={submit} className="q-form">
+              <input
+                className="q-input"
+                type="email"
+                required
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                aria-label="Email address"
+              />
+              <button className="q-btn" type="submit" disabled={busy}>
+                {busy ? "Sending…" : "Send login link"}
+              </button>
             </form>
           </>
         )}
       </main>
-      <footer className="wl-footer">
+      <footer className="q-page-footer">
         <a href="/">← waitloop</a>
       </footer>
     </div>

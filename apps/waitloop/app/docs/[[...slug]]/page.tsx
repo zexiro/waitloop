@@ -21,35 +21,35 @@ export default async function DocsPage({ params }: { params: Promise<{ slug?: st
   const [docs, html] = await Promise.all([listDocs(), marked.parse(md)]);
 
   return (
-    <div className="min-h-dvh" style={{ background: "var(--ink)", color: "var(--text-on-ink)" }}>
-      <header
-        className="flex items-center justify-between px-6 py-4 border-b"
-        style={{ borderColor: "var(--ink-line)" }}
-      >
-        <Link href="/" className="font-mono font-semibold tracking-wide text-sm">
-          <span style={{ color: "var(--accent)" }}>●</span> waitloop
-        </Link>
+    <div className="q-scope min-h-dvh">
+      <header className="a-header">
+        <nav className="a-nav">
+          <Link href="/" className="l-logo">
+            wait<span>loop</span>
+          </Link>
+          <span className="a-muted text-sm font-bold">docs</span>
+        </nav>
         <nav className="flex items-center gap-5 text-sm">
-          <a href={`/docs/${slug}.md`} className="font-mono text-xs opacity-60 hover:opacity-100">
+          <a href={`/docs/${slug}.md`} className="a-link font-mono" style={{ fontSize: "0.75rem" }}>
             view as .md
           </a>
-          <a href="/llms.txt" className="font-mono text-xs opacity-60 hover:opacity-100">
+          <a href="/llms.txt" className="a-link font-mono" style={{ fontSize: "0.75rem" }}>
             llms.txt
           </a>
-          <Link href="/login" className="opacity-80 hover:opacity-100">
+          <Link href="/login" className="q-btn q-btn--sm" style={{ textDecoration: "none" }}>
             Log in
           </Link>
         </nav>
       </header>
       <div className="max-w-5xl mx-auto flex gap-10 px-6 py-10">
         <aside className="w-44 shrink-0 hidden md:block">
-          <nav className="flex flex-col gap-2 text-sm sticky top-10">
+          <nav className="flex flex-col gap-2 text-sm sticky top-10 font-semibold">
             {docs.map((d) => (
               <Link
                 key={d.slug}
                 href={d.slug === "index" ? "/docs" : `/docs/${d.slug}`}
-                className={slug === d.slug ? "font-semibold" : "opacity-60 hover:opacity-100"}
-                style={slug === d.slug ? { color: "var(--accent)" } : undefined}
+                className={d.slug === slug ? "font-bold" : "a-muted hover:opacity-100"}
+                style={d.slug === slug ? { color: "var(--q-accent-deep)" } : undefined}
               >
                 {d.title}
               </Link>

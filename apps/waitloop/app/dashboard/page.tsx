@@ -11,10 +11,10 @@ export default async function DashboardPage() {
     <div className="flex flex-col gap-8">
       <div className="flex items-end justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-extrabold tracking-tight">Waitlists</h1>
-          <p className="text-sm opacity-60 mt-1">
+          <h1 className="a-title">Waitlists</h1>
+          <p className="a-sub">
             Agents can do all of this too — point them at{" "}
-            <code className="font-mono text-xs">{appUrl()}/api/mcp</code>
+            <code className="a-code">{appUrl()}/api/mcp</code>
           </p>
         </div>
         <form action={createWaitlistAction} className="flex gap-2">
@@ -22,50 +22,38 @@ export default async function DashboardPage() {
             name="name"
             required
             placeholder="New waitlist name"
-            className="wl-input"
-            style={{ padding: "0.5rem 0.75rem", fontSize: "0.875rem" }}
-            data-scheme="dark"
+            className="q-input q-input--sm"
           />
-          <button type="submit" className="wl-button" style={{ padding: "0.5rem 1rem", fontSize: "0.875rem" }}>
+          <button type="submit" className="q-btn q-btn--sm">
             Create
           </button>
         </form>
       </div>
 
       {rows.length === 0 ? (
-        <div
-          className="rounded-lg border border-dashed p-10 text-center text-sm opacity-70"
-          style={{ borderColor: "var(--ink-line)" }}
-        >
+        <div className="a-empty">
           No waitlists yet. Create one above — or ask your agent to:{" "}
-          <code className="font-mono text-xs">&quot;create a waitlist for my new project&quot;</code>
+          <code className="a-code">&quot;create a waitlist for my new project&quot;</code>
         </div>
       ) : (
         <ul className="grid gap-3">
           {rows.map((w) => (
-            <li
-              key={w.id}
-              className="rounded-lg border p-4 flex items-center justify-between gap-4"
-              style={{ borderColor: "var(--ink-line)", background: "var(--ink-surface)" }}
-            >
+            <li key={w.id} className="a-card p-4 flex items-center justify-between gap-4">
               <div className="min-w-0">
-                <Link href={`/dashboard/w/${w.slug}`} className="font-semibold hover:underline">
+                <Link
+                  href={`/dashboard/w/${w.slug}`}
+                  className="font-bold hover:underline underline-offset-4"
+                >
                   {w.name}
                 </Link>
-                <div className="font-mono text-xs opacity-60 mt-1 truncate">/w/{w.slug}</div>
+                <div className="a-muted font-mono text-xs mt-1 truncate">/w/{w.slug}</div>
               </div>
               <div className="flex items-center gap-6 shrink-0">
                 <div className="text-right">
-                  <div className="font-mono text-lg font-semibold" style={{ color: "var(--accent)" }}>
-                    {w.signupCount}
-                  </div>
-                  <div className="text-[11px] uppercase tracking-wider opacity-50">signups</div>
+                  <div className="a-stat-v">{w.signupCount}</div>
+                  <div className="a-stat-l">in line</div>
                 </div>
-                <a
-                  href={`/w/${w.slug}`}
-                  target="_blank"
-                  className="text-sm opacity-80 hover:opacity-100 underline underline-offset-4"
-                >
+                <a href={`/w/${w.slug}`} target="_blank" className="a-link">
                   View page ↗
                 </a>
               </div>

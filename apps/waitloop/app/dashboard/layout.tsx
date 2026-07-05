@@ -9,53 +9,32 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const notice = await billingNotice(user);
 
   return (
-    <div className="min-h-dvh" style={{ background: "var(--ink)", color: "var(--text-on-ink)" }}>
-      <header
-        className="flex items-center justify-between px-6 py-4 border-b"
-        style={{ borderColor: "var(--ink-line)" }}
-      >
-        <nav className="flex items-center gap-6 text-sm">
-          <Link href="/dashboard" className="font-mono font-semibold tracking-wide">
-            <span style={{ color: "var(--accent)" }}>●</span> waitloop
+    <div className="q-scope min-h-dvh">
+      <header className="a-header">
+        <nav className="a-nav">
+          <Link href="/dashboard" className="l-logo">
+            wait<span>loop</span>
           </Link>
-          <Link href="/dashboard" className="opacity-80 hover:opacity-100">
-            Waitlists
-          </Link>
-          <Link href="/dashboard/keys" className="opacity-80 hover:opacity-100">
-            API keys
-          </Link>
-          <Link href="/docs" className="opacity-80 hover:opacity-100">
-            Docs
-          </Link>
+          <Link href="/dashboard">Waitlists</Link>
+          <Link href="/dashboard/keys">API keys</Link>
+          <Link href="/docs">Docs</Link>
         </nav>
         <div className="flex items-center gap-4 text-sm">
-          <span className="opacity-60 font-mono text-xs">{user.email}</span>
+          <span className="a-muted font-mono text-xs">{user.email}</span>
           <form action="/api/auth/logout" method="post">
-            <button type="submit" className="opacity-80 hover:opacity-100 cursor-pointer">
+            <button type="submit" className="a-link">
               Log out
             </button>
           </form>
         </div>
       </header>
       {notice ? (
-        <div
-          className="px-6 py-2.5 text-sm flex items-center justify-center gap-3 border-b"
-          style={{
-            borderColor: "var(--ink-line)",
-            background: notice.tone === "warning" ? "rgba(255,107,61,0.12)" : "var(--ink-surface)",
-          }}
-        >
+        <div className={`a-notice${notice.tone === "warning" ? " a-notice--warning" : ""}`}>
           <span>{notice.message}</span>
-          <a
-            href={notice.actionUrl}
-            className="underline underline-offset-4 font-semibold"
-            style={{ color: "var(--accent)" }}
-          >
-            {notice.actionLabel}
-          </a>
+          <a href={notice.actionUrl}>{notice.actionLabel}</a>
         </div>
       ) : null}
-      <main className="max-w-4xl mx-auto px-6 py-10">{children}</main>
+      <main className="a-main">{children}</main>
     </div>
   );
 }
