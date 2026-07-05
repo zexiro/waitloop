@@ -61,14 +61,31 @@ Full export. `format=json` (default) or `format=csv` (returns `text/csv`).
 ### `GET /waitlists/:id/stats`
 `{"stats": {"total", "last24h", "last7d", "referred", "topReferrers", "pageUrl"}}`
 
-## Public signup (no auth — used by hosted pages and embeds)
+## Public endpoints (no auth — used by hosted pages, embeds, and integrations)
+
+### `GET /api/public/w/:slug`
+Public read of a waitlist for third-party embeds (e.g. a link-in-bio waitlist block). CORS-open, cached 30s. No emails or owner data — only what the hosted page already shows.
+```json
+{
+  "slug": "moonbase-espresso",
+  "name": "Moonbase Espresso",
+  "pageUrl": "https://waitloop.dev/w/moonbase-espresso",
+  "theme": { "headline": "…", "description": "…", "buttonText": "…", "accentColor": "#7c5cff", "background": "light" },
+  "referralsEnabled": true,
+  "avatarsEnabled": true,
+  "total": 41,
+  "front": [ { "position": 1, "avatar": { "expression": "grin", "accessory": "none", "color": "#ffd166" }, "earned": ["crown", "glow"] } ]
+}
+```
+`front` is the first 8 in line and is omitted when `avatarsEnabled` is false.
 
 ### `POST /api/public/w/:slug/signups`
 ```json
-{ "email": "visitor@example.com", "ref": "abc123", "avatar": { "expression": "grin" } }
+{ "email": "visitor@example.com", "ref": "abc123", "avatar": { "expression": "grin" }, "metadata": { "source": "indielinks" } }
 ```
 Returns `{"created", "position", "referralUrl", "referralCode", "avatar", "earned", "successMessage"}`. CORS-open.
 `earned` lists items the queue has handed out: `crown` (holding #1), `balloon`/`pennant`/`glow` (1/5/10 referrals).
+`metadata` is stored with the signup — use it for attribution when embedding the form elsewhere.
 
 ### `PATCH /api/public/w/:slug/signups`
 ```json
